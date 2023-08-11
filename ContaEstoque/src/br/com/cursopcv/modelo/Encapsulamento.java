@@ -28,9 +28,9 @@ public void remove(Produto produto) {
     em.remove(produto);
     em.getTransaction().commit();
 }
-    public void iniciarTransacao() {
-        em.getTransaction().begin();
-    }
+public void iniciarTransacao() {
+    em.getTransaction().begin();
+}
 public void closeEntityManager() {
     em.close();
 }
