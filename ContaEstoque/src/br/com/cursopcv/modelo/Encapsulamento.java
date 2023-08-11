@@ -42,4 +42,8 @@ public List<Produto> listarTodosProdutos() {
     TypedQuery<Produto> query = em.createQuery("SELECT p FROM produto p", Produto.class);
     return query.getResultList();
     }
+
+    public void reverterTransacao() {
+        em.getTransaction().rollback();
+    }
 }
