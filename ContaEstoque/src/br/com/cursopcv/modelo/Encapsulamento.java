@@ -1,6 +1,7 @@
 package br.com.cursopcv.modelo;
 
 import javax.persistence.*;
+import java.util.List;
 
 public class Encapsulamento {
     EntityManagerFactory emf;
@@ -24,7 +25,6 @@ public Produto acharProdutoCod(Long cod) {
 }
 
 public void remove(Produto produto) {
-    em.getTransaction().begin();
     em.remove(produto);
     em.getTransaction().commit();
 }
@@ -36,4 +36,8 @@ public void closeEntityManager() {
 public void transacaoCommit() {
     em.getTransaction().commit();
 }
+public List<Produto> listarTodosProdutos() {
+    TypedQuery<Produto> query = em.createQuery("SELECT p FROM produto p", Produto.class);
+    return query.getResultList();
+    }
 }
