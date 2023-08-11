@@ -1,85 +1,56 @@
 package br.com.cursopcv.servico;
-import br.com.cursopcv.modelo.*;
 
+import br.com.cursopcv.dao.ProdutoDAO;
+import br.com.cursopcv.modelo.Produto;
+import br.com.cursopcv.util.EntityManagerUtil;
+
+import javax.persistence.EntityManager;
 import java.util.List;
 
-/*
-    Classe de serviço para encapsular as operações de negócios.
-    Isso mantém a lógica de negócios separada da lógica de acesso ao banco de dados.
-    Tornando o código mais modular e mais fácil de entender.
- */
-
 public class ProdutoService implements AutoCloseable {
-    /*
-    Implementação da interface AutoCloseable para
-    gerenciar a abertura e o fechamento do ProdutoService.
-    */
-    private final Encapsulamento repositorio;
+
+    private final EntityManager entityManager;
+    private final ProdutoDAO produtoDAO;
 
     public ProdutoService() {
-        repositorio = new Encapsulamento();
+        entityManager = EntityManagerUtil.getEntityManager();
+        produtoDAO = new ProdutoDAO(entityManager);
     }
 
     public Produto buscarProdutoPorCodigo(Long cod) {
-        return repositorio.acharProdutoCod(cod);
+        return produtoDAO.buscarPorCodigo(cod);
     }
 
     public List<Produto> listarTodosProdutos() {
-        return repositorio.listarTodosProdutos();
+        return produtoDAO.listarTodos();
     }
 
     public void incluirNovoProduto(String nome, String descricao, double preco) {
         Produto produto = new Produto(nome, descricao, preco);
-        repositorio.incluir(produto);
-        repositorio.transacaoCommit();
+        produtoDAO.salvar(produto);
     }
 
     public void removerProdutoPorCodigo(Long codigo) {
-        try {
-            repositorio.iniciarTransacao();
-            Produto produto = buscarProdutoPorCodigo(codigo);
-
-            if (produto != null) {
-                repositorio.remove(produto);
-                repositorio.transacaoCommit();
-                System.out.println("O produto foi removido com sucesso.");
-            } else {
-                System.out.println("O produto não foi encontrado. Tente novamente");
-            }
-        } catch (Exception e) {
-            repositorio.reverterTransacao();
-            e.printStackTrace();
-        } finally {
-            repositorio.closeEntityManager();
+        Produto produto = buscarProdutoPorCodigo(codigo);
+        if (produto != null) {
+            produtoDAO.remover(produto);
+        } else {
+            System.out.println("O produto não foi encontrado. Tente novamente");
         }
     }
 
     public void alterarPrecoProduto(Long codigo, double novoPreco) {
-        try {
-            repositorio.iniciarTransacao();
-            Produto produto = buscarProdutoPorCodigo(codigo);
-
-            if (produto != null) {
-                produto.setPreco(novoPreco);
-                repositorio.transacaoCommit();
-            } else {
-                System.out.println("O produto não foi encontrado. Tente novamente");
-            }
-        } catch (Exception e) {
-            repositorio.reverterTransacao();
-            e.printStackTrace();
-        } finally {
-            repositorio.closeEntityManager();
+        Produto produto = buscarProdutoPorCodigo(codigo);
+        if (produto != null) {
+            produto.setPreco(novoPreco);
+            produtoDAO.atualizar(produto);
+        } else {
+            System.out.println("O produto não foi encontrado. Tente novamente");
         }
     }
 
     @Override
     public void close() {
-        repositorio.closeEntityManager();
+        entityManager.close();
     }
-
 }
-
-
-
-
